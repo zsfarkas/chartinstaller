@@ -32,12 +32,12 @@ func main() {
 	{
 		releasesGroup := v1.Group("/releases")
 		{
-			c := releases.NewController()
-			releasesGroup.GET("/config", c.GetConfig)
-			releasesGroup.GET("", c.ListReleases)
-			releasesGroup.GET(":name", c.StatusRelease)
-			releasesGroup.PUT(":name", c.InstallOrUpgradeRelease)
-			releasesGroup.DELETE(":name", c.UninstallRelease)
+			releaseController := releases.NewController()
+			releasesGroup.GET("/config", releaseController.GetConfig)
+			releasesGroup.GET("", releaseController.ListReleases)
+			releasesGroup.GET(":name", releaseController.StatusRelease)
+			releasesGroup.PUT(":name", releaseController.InstallOrUpgradeRelease)
+			releasesGroup.DELETE(":name", releaseController.UninstallRelease)
 		}
 		healthGroup := v1.Group("/health")
 		{
