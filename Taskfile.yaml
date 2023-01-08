@@ -1,0 +1,26 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  VERSION: 0.2
+
+tasks:
+  build:
+    cmds:
+      - docker build -t zsfarkas/chartinstaller:{{.VERSION}} -t zsfarkas/chartinstaller:latest --target final .
+  push:
+    cmds:
+      - docker push zsfarkas/chartinstaller:{{.VERSION}}
+      - docker push zsfarkas/chartinstaller:latest
+  install:
+    dir: helm/chartinstaller
+    cmds:
+      - helm upgrade chartinstaller -n chartinstaller -i --create-namespace .
+  uninstall:
+    cmds:
+      - helm uninstall chartinstaller -n chartinstaller
+  default:
+    cmds:
+    - task: build
+    - task: push

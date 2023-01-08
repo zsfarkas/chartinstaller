@@ -1,0 +1,208 @@
+basePath: /api/v1
+definitions:
+  generic.HTTPError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: status bad request
+        type: string
+    type: object
+  health.Health:
+    properties:
+      status:
+        example: OK
+        type: string
+    type: object
+  releases.Controller:
+    properties:
+      chartMuseumUri:
+        type: string
+      targetNamespace:
+        type: string
+    type: object
+  releases.ReleaseRequest:
+    type: object
+  releases.ReleaseStatus:
+    properties:
+      chart:
+        example: chart1
+        type: string
+      name:
+        example: release1
+        type: string
+      namespace:
+        example: namespace1
+        type: string
+      revision:
+        example: 1
+        type: integer
+      status:
+        example: deployed
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This API allows to install helm charts from the configured chart museum.
+  title: Chart Installer API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: It responses with health status, if service is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/health.Health'
+      summary: Responses with health status
+      tags:
+      - health
+  /releases:
+    get:
+      consumes:
+      - application/json
+      description: It lists all releases names, which were previously installed.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+      summary: List all of the chart releases names
+      tags:
+      - releases
+  /releases/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: It uninstalls the given chart release, which was previously installed.
+      parameters:
+      - description: Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/releases.ReleaseStatus'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+      summary: Uninstall a chart release
+      tags:
+      - releases
+    get:
+      consumes:
+      - application/json
+      description: It gets the status information of one chart release, which was
+        previously installed.
+      parameters:
+      - description: Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/releases.ReleaseStatus'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+      summary: Get the status of one chart release
+      tags:
+      - releases
+    put:
+      consumes:
+      - application/json
+      description: It installs one chart with the provided release name and values.
+        If the release is already installed, then it upgrades the release with the
+        provided values.
+      parameters:
+      - description: Name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: '{'
+        in: body
+        name: releaseRequest
+        required: true
+        schema:
+          $ref: '#/definitions/releases.ReleaseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/releases.ReleaseStatus'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+      summary: Install or upgrade one chart release
+      tags:
+      - releases
+  /releases/config:
+    get:
+      consumes:
+      - application/json
+      description: It lists all the properties, which are configured for this service.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/releases.Controller'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/generic.HTTPError'
+      summary: List the config of the service
+      tags:
+      - releases
+swagger: "2.0"
