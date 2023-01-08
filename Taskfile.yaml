@@ -3,16 +3,22 @@
 version: '3'
 
 vars:
-  VERSION: 0.2
+  VERSION: 0.3.0
 
 tasks:
   build:
     cmds:
       - docker build -t zsfarkas/chartinstaller:{{.VERSION}} -t zsfarkas/chartinstaller:latest --target final .
-  push:
+  push-docker:
     cmds:
       - docker push zsfarkas/chartinstaller:{{.VERSION}}
       - docker push zsfarkas/chartinstaller:latest
+  push-helm:
+    dir: helm/chartinstaller
+    cmds:
+      - helm dep update
+      - helm lint .
+      - helm package . --version {{.VERSION}}
   install:
     dir: helm/chartinstaller
     cmds:
@@ -23,4 +29,5 @@ tasks:
   default:
     cmds:
     - task: build
-    - task: push
+    - task: push-docker
+    - task: push-helm
