@@ -2,6 +2,7 @@ package releases
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"os"
 
@@ -22,7 +23,10 @@ func NewController() *Controller {
 
 	repoUrl := os.Getenv("CHART_MUSEUM_URI")
 
-	initRepo(repoUrl, targetNamespace)
+	err := initRepo(repoUrl, targetNamespace)
+	if err != nil {
+		log.Printf("could not initialize repository %s; cause: %s", repoUrl, err)
+	}
 
 	return &Controller{
 		ChartMuseumUri:  repoUrl,
