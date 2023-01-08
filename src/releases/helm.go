@@ -3,6 +3,7 @@ package releases
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
@@ -116,18 +117,20 @@ func initRepo(repoUrl string, targetNamespace string) error {
 		return err
 	}
 
+	log.Printf("creating dirs for repo file...")
+	err = os.MkdirAll(filepath.Dir(settings.RepositoryConfig), os.ModePerm)
+	if err != nil && !os.IsExist(err) {
+		return err
+	}
+
+	log.Printf("loading repo file...")
 	repoFile, err := repo.LoadFile(settings.RepositoryConfig)
 	if err != nil {
-		return err
+		log.Printf("could not load repo file, trying to create...")
+		repoFile = repo.NewFile()
 	}
 
-	repoFile.Update(&entry)
-
-	repoFile.WriteFile(settings.RepositoryConfig, 0644)
-	if err != nil {
-		return err
-	}
-
+	log.Printf("creating new chart repostiroy...")
 	r, err := repo.NewChartRepository(&entry, getter.All(settings))
 	if err != nil {
 		return err
@@ -135,6 +138,15 @@ func initRepo(repoUrl string, targetNamespace string) error {
 
 	log.Printf("downloading index file for repository...")
 	_, err = r.DownloadIndexFile()
+	if err != nil {
+		return err
+	}
+
+	log.Printf("adding repository to repo file...")
+	repoFile.Update(&entry)
+
+	log.Printf("writing repo file...")
+	repoFile.WriteFile(settings.RepositoryConfig, 0644)
 	if err != nil {
 		return err
 	}
